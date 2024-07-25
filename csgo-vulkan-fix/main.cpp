@@ -55,8 +55,19 @@ void hkSetWindowSize(CXWaylandSurface* surface, const CBox& box) {
     CBox       newBox = box;
 
     if (PWINDOW && PWINDOW->m_szInitialClass == *PCLASS) {
-        newBox.w = **RESX;
-        newBox.h = **RESY;
+        // Calculate the new width and height with black borders
+        int new_width = 1600;
+        int new_height = 900;
+
+        // Calculate the position to center the window
+        int new_x = (5120 - new_width) / 2;
+        int new_y = (1440 - new_height) / 2;
+
+        // Set the newBox to the desired size and position
+        newBox.x = new_x;
+        newBox.y = new_y;
+        newBox.w = new_width;
+        newBox.h = new_height;
 
         CWLSurface::fromResource(SURF)->m_bFillIgnoreSmall = true;
     }
@@ -91,8 +102,8 @@ APICALL EXPORT PLUGIN_DESCRIPTION_INFO PLUGIN_INIT(HANDLE handle) {
         throw std::runtime_error("[vkfix] Version mismatch");
     }
 
-    HyprlandAPI::addConfigValue(PHANDLE, "plugin:csgo-vulkan-fix:res_w", Hyprlang::INT{1680});
-    HyprlandAPI::addConfigValue(PHANDLE, "plugin:csgo-vulkan-fix:res_h", Hyprlang::INT{1050});
+    HyprlandAPI::addConfigValue(PHANDLE, "plugin:csgo-vulkan-fix:res_w", Hyprlang::INT{1600});
+    HyprlandAPI::addConfigValue(PHANDLE, "plugin:csgo-vulkan-fix:res_h", Hyprlang::INT{900});
     HyprlandAPI::addConfigValue(PHANDLE, "plugin:csgo-vulkan-fix:class", Hyprlang::STRING{"cs2"});
 
     auto FNS     = HyprlandAPI::findFunctionsByName(PHANDLE, "sendPointerMotion");
@@ -139,3 +150,4 @@ APICALL EXPORT PLUGIN_DESCRIPTION_INFO PLUGIN_INIT(HANDLE handle) {
 APICALL EXPORT void PLUGIN_EXIT() {
     ;
 }
+
