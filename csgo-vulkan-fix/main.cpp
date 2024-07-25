@@ -24,9 +24,9 @@ APICALL EXPORT std::string PLUGIN_API_VERSION() {
 }
 
 void hkNotifyMotion(CSeatManager* thisptr, uint32_t time_msec, const Vector2D& local) {
-    static auto* const RESX   = (Hyprlang::INT* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:csgo-vulkan-fix:res_w")->getDataStaticPtr();
-    static auto* const RESY   = (Hyprlang::INT* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:csgo-vulkan-fix:res_h")->getDataStaticPtr();
-    static auto* const PCLASS = (Hyprlang::STRING const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:csgo-vulkan-fix:class")->getDataStaticPtr();
+    static auto* const RESX   = (Hyprlang::INT* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:csgo:res_w")->getDataStaticPtr();
+    static auto* const RESY   = (Hyprlang::INT* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:csgo:res_h")->getDataStaticPtr();
+    static auto* const PCLASS = (Hyprlang::STRING const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:csgo:class")->getDataStaticPtr();
 
     Vector2D           newCoords = local;
 
@@ -40,9 +40,9 @@ void hkNotifyMotion(CSeatManager* thisptr, uint32_t time_msec, const Vector2D& l
 }
 
 void hkSetWindowSize(CXWaylandSurface* surface, const CBox& box) {
-    static auto* const RESX   = (Hyprlang::INT* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:csgo-vulkan-fix:res_w")->getDataStaticPtr();
-    static auto* const RESY   = (Hyprlang::INT* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:csgo-vulkan-fix:res_h")->getDataStaticPtr();
-    static auto* const PCLASS = (Hyprlang::STRING const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:csgo-vulkan-fix:class")->getDataStaticPtr();
+    static auto* const RESX   = (Hyprlang::INT* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:csgo:res_w")->getDataStaticPtr();
+    static auto* const RESY   = (Hyprlang::INT* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:csgo:res_h")->getDataStaticPtr();
+    static auto* const PCLASS = (Hyprlang::STRING const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:csgo:class")->getDataStaticPtr();
 
     if (!surface) {
         (*(origSurfaceSize)g_pSurfaceSizeHook->m_pOriginal)(surface, box);
@@ -78,7 +78,7 @@ void hkSetWindowSize(CXWaylandSurface* surface, const CBox& box) {
 CRegion hkWLSurfaceDamage(CWLSurface* thisptr) {
     const auto         RG = (*(origWLSurfaceDamage)g_pWLSurfaceDamageHook->m_pOriginal)(thisptr);
 
-    static auto* const PCLASS = (Hyprlang::STRING const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:csgo-vulkan-fix:class")->getDataStaticPtr();
+    static auto* const PCLASS = (Hyprlang::STRING const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:csgo:class")->getDataStaticPtr();
 
     if (thisptr->exists() && thisptr->getWindow() && thisptr->getWindow()->m_szInitialClass == *PCLASS) {
         const auto PMONITOR = g_pCompositor->getMonitorFromID(thisptr->getWindow()->m_iMonitorID);
@@ -97,14 +97,14 @@ APICALL EXPORT PLUGIN_DESCRIPTION_INFO PLUGIN_INIT(HANDLE handle) {
     const std::string HASH = __hyprland_api_get_hash();
 
     if (HASH != GIT_COMMIT_HASH) {
-        HyprlandAPI::addNotification(PHANDLE, "[csgo-vulkan-fix] Failure in initialization: Version mismatch (headers ver is not equal to running hyprland ver)",
+        HyprlandAPI::addNotification(PHANDLE, "[csgo] Failure in initialization: Version mismatch (headers ver is not equal to running hyprland ver)",
                                      CColor{1.0, 0.2, 0.2, 1.0}, 5000);
         throw std::runtime_error("[vkfix] Version mismatch");
     }
 
-    HyprlandAPI::addConfigValue(PHANDLE, "plugin:csgo-vulkan-fix:res_w", Hyprlang::INT{1600});
-    HyprlandAPI::addConfigValue(PHANDLE, "plugin:csgo-vulkan-fix:res_h", Hyprlang::INT{900});
-    HyprlandAPI::addConfigValue(PHANDLE, "plugin:csgo-vulkan-fix:class", Hyprlang::STRING{"cs2"});
+    HyprlandAPI::addConfigValue(PHANDLE, "plugin:csgo:res_w", Hyprlang::INT{1600});
+    HyprlandAPI::addConfigValue(PHANDLE, "plugin:csgo:res_h", Hyprlang::INT{900});
+    HyprlandAPI::addConfigValue(PHANDLE, "plugin:csgo:class", Hyprlang::STRING{"cs2"});
 
     auto FNS     = HyprlandAPI::findFunctionsByName(PHANDLE, "sendPointerMotion");
     bool success = !FNS.empty();
@@ -129,7 +129,7 @@ APICALL EXPORT PLUGIN_DESCRIPTION_INFO PLUGIN_INIT(HANDLE handle) {
 
     success = success && g_pSurfaceSizeHook && g_pWLSurfaceDamageHook && g_pMouseMotionHook;
     if (!success) {
-        HyprlandAPI::addNotification(PHANDLE, "[csgo-vulkan-fix] Failure in initialization: Failed to find required hook fns", CColor{1.0, 0.2, 0.2, 1.0}, 5000);
+        HyprlandAPI::addNotification(PHANDLE, "[csgo] Failure in initialization: Failed to find required hook fns", CColor{1.0, 0.2, 0.2, 1.0}, 5000);
         throw std::runtime_error("[vkfix] Hooks fn init failed");
     }
 
@@ -138,13 +138,13 @@ APICALL EXPORT PLUGIN_DESCRIPTION_INFO PLUGIN_INIT(HANDLE handle) {
     success = success && g_pSurfaceSizeHook->hook();
 
     if (success)
-        HyprlandAPI::addNotification(PHANDLE, "[csgo-vulkan-fix] Initialized successfully! (Anything version)", CColor{0.2, 1.0, 0.2, 1.0}, 5000);
+        HyprlandAPI::addNotification(PHANDLE, "[csgo] Initialized successfully! (Anything version)", CColor{0.2, 1.0, 0.2, 1.0}, 5000);
     else {
-        HyprlandAPI::addNotification(PHANDLE, "[csgo-vulkan-fix] Failure in initialization (hook failed)!", CColor{1.0, 0.2, 0.2, 1.0}, 5000);
+        HyprlandAPI::addNotification(PHANDLE, "[csgo] Failure in initialization (hook failed)!", CColor{1.0, 0.2, 0.2, 1.0}, 5000);
         throw std::runtime_error("[csgo-vk-fix] Hooks failed");
     }
 
-    return {"csgo-vulkan-fix", "A plugin to force specific apps to a fake resolution", "Vaxry", "1.2"};
+    return {"csgo", "A plugin to force specific apps to a fake resolution", "Vaxry", "1.2"};
 }
 
 APICALL EXPORT void PLUGIN_EXIT() {
